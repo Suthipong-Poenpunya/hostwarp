@@ -93,12 +93,12 @@ function doGet(e) {
 function getNextInQueue() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_NAME);
   if (!sheet) {
-    return { success: false, hasData: false, message: 'Sheet not found: ' + CONFIG.SHEET_NAME };
+    return { success: false, hasData: false, pending: 0, message: 'Sheet not found: ' + CONFIG.SHEET_NAME };
   }
   
   const lastRow = sheet.getLastRow();
   if (lastRow < CONFIG.DATA_START_ROW) {
-    return { success: true, hasData: false, message: 'No submissions yet' };
+    return { success: true, hasData: false, pending: 0, message: 'No submissions yet' };
   }
   
   const now = new Date();
@@ -109,16 +109,20 @@ function getNextInQueue() {
   
   let currentlyDisplaying = -1;
   let firstPending = -1;
+  let pendingCount = 0;
   
   for (let i = 0; i < statusRange.length; i++) {
     const status = statusRange[i][0].toString().toLowerCase().trim();
     
     if (status === 'displaying') {
-      currentlyDisplaying = i + CONFIG.DATA_START_ROW; // actual row number
+      currentlyDisplaying = i + CONFIG.DATA_START_ROW;
     }
     
-    if (status === 'pending' && firstPending === -1) {
-      firstPending = i + CONFIG.DATA_START_ROW; // actual row number
+    if (status === 'pending') {
+      pendingCount++;
+      if (firstPending === -1) {
+        firstPending = i + CONFIG.DATA_START_ROW;
+      }
     }
   }
   
@@ -137,6 +141,7 @@ function getNextInQueue() {
           success: true,
           hasData: true,
           isNew: false,
+          pending: pendingCount,
           remainingSec: Math.ceil(CONFIG.DISPLAY_DURATION_SEC - elapsedSec),
           data: data,
           row: currentlyDisplaying
@@ -149,28 +154,30 @@ function getNextInQueue() {
   }
   
   // ดึง pending ตัวถัดไป
-  // ต้อง re-scan เพราะ firstPending อาจเปลี่ยนหลัง markAsShown
   if (firstPending === -1) {
-    // Re-scan for pending
     const freshStatusRange = sheet.getRange(CONFIG.DATA_START_ROW, COLS.STATUS, lastRow - 1, 1).getValues();
+    pendingCount = 0;
     for (let i = 0; i < freshStatusRange.length; i++) {
       if (freshStatusRange[i][0].toString().toLowerCase().trim() === 'pending') {
-        firstPending = i + CONFIG.DATA_START_ROW;
-        break;
+        pendingCount++;
+        if (firstPending === -1) {
+          firstPending = i + CONFIG.DATA_START_ROW;
+        }
       }
     }
   }
   
   if (firstPending > 0) {
-    // Set status = "displaying" and record display time
     sheet.getRange(firstPending, COLS.STATUS).setValue('displaying');
     sheet.getRange(firstPending, COLS.DISPLAY_TIME).setValue(now.toISOString());
+    pendingCount = Math.max(0, pendingCount - 1);
     
     const data = getRowData(sheet, firstPending);
     return {
       success: true,
       hasData: true,
       isNew: true,
+      pending: pendingCount,
       remainingSec: CONFIG.DISPLAY_DURATION_SEC,
       data: data,
       row: firstPending
@@ -178,7 +185,7 @@ function getNextInQueue() {
   }
   
   // ไม่มีข้อมูลรอแสดง
-  return { success: true, hasData: false, message: 'Queue is empty' };
+  return { success: true, hasData: false, pending: 0, message: 'Queue is empty' };
 }
 
 /**

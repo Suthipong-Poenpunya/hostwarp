@@ -650,7 +650,8 @@
     // ==================== CONFIG ====================
     const API_URL = 'https://script.google.com/macros/s/AKfycbzddaXvqhVicVimqR_D_NFk-YpfRWZSSGmcnf1fzntRltQdUO6u2s_B8iIq7x8xBphq9w/exec';
     const FORM_URL = 'https://forms.gle/3P68hYuUket3nGk78';
-    const POLL_INTERVAL = 3000;
+    const POLL_IDLE = 10000;     // 10 วินาที เมื่อไม่มีข้อมูล (ประหยัด quota)
+    const POLL_ACTIVE = 5000;    // 5 วินาที เมื่อกำลังแสดงข้อมูล
     const DISPLAY_DURATION = 15000;
 
     let currentData = null;
@@ -682,10 +683,14 @@
 
     // ==================== POLLING ====================
     function startPolling() {
-      if (pollTimer) clearInterval(pollTimer);
+      if (pollTimer) clearTimeout(pollTimer);
       if (!API_URL) return;
       poll();
-      pollTimer = setInterval(poll, POLL_INTERVAL);
+    }
+
+    function schedulePoll(interval) {
+      if (pollTimer) clearTimeout(pollTimer);
+      pollTimer = setTimeout(poll, interval);
     }
 
     async function poll() {
@@ -700,27 +705,23 @@
             showContact(json.data, json.remainingSec);
           }
           updateProgress(json.remainingSec);
+          // Active: poll เร็วขึ้น
+          schedulePoll(POLL_ACTIVE);
         } else {
           if (currentData) hideContact();
+          // Idle: poll ช้าลง ประหยัด quota
+          schedulePoll(POLL_IDLE);
         }
 
-        // Update queue count
-        fetchQueueStatus();
-      } catch (e) {
-        console.error('Poll error:', e);
-      }
-    }
-
-    async function fetchQueueStatus() {
-      if (!API_URL) return;
-      try {
-        const url = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=status&t=' + Date.now();
-        const res = await fetch(url);
-        const json = await res.json();
-        if (json.success) {
+        // อัปเดต queue count จาก response เดียวกัน (ไม่ต้องเรียก API แยก)
+        if (json.pending !== undefined) {
           document.getElementById('queue-count').textContent = json.pending || 0;
         }
-      } catch (e) { }
+      } catch (e) {
+        console.error('Poll error:', e);
+        // Error: retry ช้าลง
+        schedulePoll(POLL_IDLE);
+      }
     }
 
     // ==================== DISPLAY ====================
