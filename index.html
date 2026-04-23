@@ -60,17 +60,6 @@
       }
     }
 
-    @keyframes shootStar {
-      0% {
-        transform: translateX(0) translateY(0);
-        opacity: 1
-      }
-
-      100% {
-        transform: translateX(300px) translateY(300px);
-        opacity: 0
-      }
-    }
 
     /* ===== BACKGROUND ===== */
     #bg-gradient {
@@ -572,6 +561,27 @@
       z-index: 11;
       font-family: 'Inter', monospace
     }
+
+    /* ===== FULLSCREEN BUTTON ===== */
+    #fs-btn {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      z-index: 100;
+      width: 40px;
+      height: 40px;
+      background: rgba(30, 41, 59, .7);
+      border: 1px solid rgba(59, 130, 246, .2);
+      border-radius: 10px;
+      cursor: pointer;
+      color: #60a5fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: .4;
+      transition: opacity .3s
+    }
+    #fs-btn:hover { opacity: 1 }
   </style>
 </head>
 
@@ -640,6 +650,12 @@
     </div>
   </div>
 
+  <!-- Fullscreen Button -->
+  <button id="fs-btn" onclick="toggleFullscreen()" title="เต็มจอ">
+    <svg id="fs-icon-enter" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+    <svg id="fs-icon-exit" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M4 14h6v6m10-10h-6V4m0 16h6v-6M4 10h6V4"/></svg>
+  </button>
+
   <!-- Footer -->
   <div
     style="position:fixed;bottom:0;left:0;width:100%;text-align:center;padding:6px 0;font-size:.7rem;color:rgba(100,116,139,.4);z-index:10;letter-spacing:1px;font-family:'Inter',sans-serif">
@@ -670,13 +686,6 @@
         s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random() * 100}%;left:${Math.random() * 100}%;opacity:${Math.random() * .6 + .2};animation:twinkle ${Math.random() * 4 + 2}s ease-in-out infinite ${Math.random() * 3}s`;
         sf.appendChild(s);
       }
-      // Shooting stars
-      setInterval(() => {
-        const ss = document.createElement('div');
-        ss.style.cssText = `position:absolute;top:${Math.random() * 40}%;left:${Math.random() * 60}%;width:80px;height:1px;background:linear-gradient(90deg,#fff,transparent);animation:shootStar 1.5s linear forwards;opacity:.6;border-radius:1px`;
-        sf.appendChild(ss);
-        setTimeout(() => ss.remove(), 1600);
-      }, 4000);
     }
 
 
@@ -808,6 +817,20 @@
       }, 15000);
       showContact(demos[0], 15);
     }
+
+    // ==================== FULLSCREEN ====================
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    document.addEventListener('fullscreenchange', () => {
+      const isFs = !!document.fullscreenElement;
+      document.getElementById('fs-icon-enter').style.display = isFs ? 'none' : 'block';
+      document.getElementById('fs-icon-exit').style.display = isFs ? 'block' : 'none';
+    });
 
     // ==================== INIT ====================
     window.addEventListener('DOMContentLoaded', () => {
