@@ -623,7 +623,7 @@
       <div class="sidebar-title">📱 มาแจก Contact กัน!</div>
       <div class="sidebar-sub">ส่ง Contact IG ของคุณ<br>ขึ้นจอให้ทุกคนเห็น!</div>
       <div id="qr-container">
-        <div id="qr-placeholder">⚙️ ใส่ลิงค์ QR Code<br>ในการตั้งค่า</div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fforms.gle%2F3P68hYuUket3nGk78" alt="QR Code">
       </div>
       <div class="sidebar-cta">สแกนเพื่อส่ง Contact ขึ้นจอ! 🎉</div>
       <div id="queue-info">
@@ -633,25 +633,15 @@
     </div>
   </div>
 
-  <!-- Config Toggle -->
-  <div id="config-toggle" onclick="toggleConfig()">⚙</div>
-  <div id="config-panel">
-    <h3>⚙️ ตั้งค่าระบบ</h3>
-    <label>Apps Script Web App URL</label>
-    <input type="text" id="cfg-api-url" placeholder="https://script.google.com/macros/s/xxx/exec">
-    <label>QR Code Image URL (ลิงค์รูปภาพ QR)</label>
-    <input type="text" id="cfg-qr-url" placeholder="https://example.com/qr-code.png">
-    <label>Google Form URL (สำหรับสร้าง QR)</label>
-    <input type="text" id="cfg-form-url" placeholder="https://forms.gle/xxx">
-    <button onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
-    <div class="config-status" id="config-status"></div>
+  <!-- Footer -->
+  <div style="position:fixed;bottom:0;left:0;width:100%;text-align:center;padding:6px 0;font-size:.7rem;color:rgba(100,116,139,.4);z-index:10;letter-spacing:1px;font-family:'Inter',sans-serif">
+    System Development By Suthipong Poenpanya, All Rights Reserved.
   </div>
 
   <script>
     // ==================== CONFIG ====================
-    let API_URL = localStorage.getItem('edu_api_url') || '';
-    let QR_IMAGE_URL = localStorage.getItem('edu_qr_url') || '';
-    let FORM_URL = localStorage.getItem('edu_form_url') || '';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzddaXvqhVicVimqR_D_NFk-YpfRWZSSGmcnf1fzntRltQdUO6u2s_B8iIq7x8xBphq9w/exec';
+    const FORM_URL = 'https://forms.gle/3P68hYuUket3nGk78';
     const POLL_INTERVAL = 3000;
     const DISPLAY_DURATION = 15000;
 
@@ -680,36 +670,7 @@
       }, 4000);
     }
 
-    // ==================== CONFIG PANEL ====================
-    function toggleConfig() {
-      document.getElementById('config-panel').classList.toggle('show');
-      document.getElementById('cfg-api-url').value = API_URL;
-      document.getElementById('cfg-qr-url').value = QR_IMAGE_URL;
-      document.getElementById('cfg-form-url').value = FORM_URL;
-    }
 
-    function saveConfig() {
-      API_URL = document.getElementById('cfg-api-url').value.trim();
-      QR_IMAGE_URL = document.getElementById('cfg-qr-url').value.trim();
-      FORM_URL = document.getElementById('cfg-form-url').value.trim();
-      localStorage.setItem('edu_api_url', API_URL);
-      localStorage.setItem('edu_qr_url', QR_IMAGE_URL);
-      localStorage.setItem('edu_form_url', FORM_URL);
-
-      // Update QR
-      const qrC = document.getElementById('qr-container');
-      if (QR_IMAGE_URL) {
-        qrC.innerHTML = `<img src="${QR_IMAGE_URL}" alt="QR Code">`;
-      } else if (FORM_URL) {
-        qrC.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(FORM_URL)}" alt="QR Code">`;
-      }
-
-      const st = document.getElementById('config-status');
-      st.textContent = '✅ บันทึกเรียบร้อย!';
-      st.className = 'config-status ok';
-      if (API_URL) startPolling();
-      setTimeout(() => { st.textContent = ''; }, 3000);
-    }
 
     // ==================== POLLING ====================
     function startPolling() {
@@ -842,18 +803,7 @@
     // ==================== INIT ====================
     window.addEventListener('DOMContentLoaded', () => {
       createStars();
-
-      // Load saved config
-      if (QR_IMAGE_URL) {
-        document.getElementById('qr-container').innerHTML = `<img src="${QR_IMAGE_URL}" alt="QR Code">`;
-      } else if (FORM_URL) {
-        document.getElementById('qr-container').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(FORM_URL)}" alt="QR Code">`;
-      }
-
-      // Start polling if API URL is set
-      if (API_URL) {
-        startPolling();
-      }
+      startPolling();
     });
   </script>
 </body>
