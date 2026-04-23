@@ -650,9 +650,9 @@
     // ==================== CONFIG ====================
     const API_URL = 'https://script.google.com/macros/s/AKfycbzddaXvqhVicVimqR_D_NFk-YpfRWZSSGmcnf1fzntRltQdUO6u2s_B8iIq7x8xBphq9w/exec';
     const FORM_URL = 'https://forms.gle/3P68hYuUket3nGk78';
-    const POLL_IDLE = 10000;     // 10 วินาที เมื่อไม่มีข้อมูล (ประหยัด quota)
-    const POLL_ACTIVE = 5000;    // 5 วินาที เมื่อกำลังแสดงข้อมูล
-    const DISPLAY_DURATION = 15000;
+    const POLL_IDLE = 30000;     // 30 วินาที เมื่อไม่มีข้อมูล (ประหยัด quota)
+    const POLL_ACTIVE = 20000;   // 20 วินาที เมื่อกำลังแสดงข้อมูล (ตรงกับเวลาแสดง)
+    const DISPLAY_DURATION = 20000;
 
     let currentData = null;
     let displayTimer = null;

@@ -15,7 +15,7 @@
 
 // ==================== CONFIG ====================
 const CONFIG = {
-  DISPLAY_DURATION_SEC: 15,   // ระยะเวลาแสดงแต่ละคน (วินาที)
+  DISPLAY_DURATION_SEC: 20,   // ระยะเวลาแสดงแต่ละคน (วินาที)
   SHEET_NAME: 'Form Responses 1', // ชื่อ Sheet (ปรับตาม Google Form)
   STATUS_COL: 'G',           // คอลัมน์ Status
   DISPLAY_TIME_COL: 'H',     // คอลัมน์ Display Time
