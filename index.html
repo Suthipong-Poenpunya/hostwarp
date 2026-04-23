@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EDU The Final Chapter - Contact Display</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Kanit', sans-serif
+    }
+
+    body {
+      background: #000;
+      color: #fff
+    }
+
+    /* ===== STARFIELD ===== */
+    #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: .2;
+        transform: scale(.8)
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.2)
+      }
+    }
+
+    @keyframes shootStar {
+      0% {
+        transform: translateX(0) translateY(0);
+        opacity: 1
+      }
+
+      100% {
+        transform: translateX(300px) translateY(300px);
+        opacity: 0
+      }
+    }
+
+    /* ===== BACKGROUND ===== */
+    #bg-gradient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #000 0%, #0a0a2e 30%, #0d1b3e 50%, #0a1628 70%, #000 100%);
+      z-index: 0
+    }
+
+    #bg-glow1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, rgba(30, 64, 175, .15) 0%, transparent 70%);
+      z-index: 0
+    }
+
+    #bg-glow2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(circle, rgba(59, 130, 246, .1) 0%, transparent 70%);
+      z-index: 0
+    }
+
+    /* ===== HEADER ===== */
+    #header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 20px 0 10px;
+      border-bottom: 1px solid rgba(59, 130, 246, .2)
+    }
+
+    #header h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa, #60a5fa);
+      background-size: 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s ease infinite;
+      letter-spacing: 2px
+    }
+
+    #header .subtitle {
+      font-size: 1rem;
+      color: rgba(148, 163, 184, .8);
+      font-weight: 300;
+      margin-top: 2px;
+      letter-spacing: 4px
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 50%
+      }
+
+      100% {
+        background-position: -200% 50%
+      }
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    #main {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      height: calc(100vh - 90px);
+      padding: 20px 30px
+    }
+
+    #display-area {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative
+    }
+
+    #sidebar {
+      flex: 1;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      border-left: 1px solid rgba(59, 130, 246, .15)
+    }
+
+    /* ===== CONTACT CARD ===== */
+    #contact-card {
+      width: 100%;
+      max-width: 650px;
+      padding: 40px;
+      border-radius: 24px;
+      background: rgba(15, 23, 42, .7);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(59, 130, 246, .2);
+      box-shadow: 0 0 60px rgba(59, 130, 246, .1), inset 0 1px 0 rgba(255, 255, 255, .05);
+      opacity: 0;
+      transform: translateY(30px) scale(.97);
+      transition: all .8s cubic-bezier(.16, 1, .3, 1);
+      position: relative;
+      overflow: hidden
+    }
+
+    #contact-card.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1)
+    }
+
+    #contact-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #3b82f6, #8b5cf6, #3b82f6, transparent)
+    }
+
+    .card-name {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(59, 130, 246, .4);
+      margin-bottom: 4px;
+      line-height: 1.2
+    }
+
+    .card-ig {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .card-ig svg {
+      width: 24px;
+      height: 24px;
+      fill: #60a5fa
+    }
+
+    .card-major {
+      font-size: .95rem;
+      color: rgba(148, 163, 184, .7);
+      margin-bottom: 18px;
+      padding: 6px 14px;
+      background: rgba(59, 130, 246, .1);
+      border-radius: 20px;
+      display: inline-block;
+      border: 1px solid rgba(59, 130, 246, .15)
+    }
+
+    .card-quote {
+      font-size: 1.35rem;
+      font-weight: 400;
+      color: rgba(226, 232, 240, .9);
+      font-style: italic;
+      line-height: 1.6;
+      margin: 18px 0;
+      padding: 16px 20px;
+      border-left: 3px solid rgba(139, 92, 246, .5);
+      background: rgba(139, 92, 246, .05);
+      border-radius: 0 12px 12px 0
+    }
+
+    .card-quote::before {
+      content: '"';
+      font-size: 3rem;
+      color: rgba(139, 92, 246, .3);
+      line-height: 0;
+      vertical-align: -18px;
+      margin-right: 4px
+    }
+
+    .card-image-wrap {
+      margin-top: 20px;
+      border-radius: 16px;
+      overflow: hidden;
+      max-height: 320px;
+      border: 1px solid rgba(59, 130, 246, .15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .4)
+    }
+
+    .card-image-wrap img {
+      width: 100%;
+      height: auto;
+      max-height: 320px;
+      object-fit: cover;
+      display: block
+    }
+
+    /* ===== IDLE STATE ===== */
+    #idle-display {
+      text-align: center;
+      opacity: 0;
+      transform: scale(.95);
+      transition: all .6s ease;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.95)
+    }
+
+    #idle-display.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1)
+    }
+
+    #idle-display .idle-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite
+    }
+
+    #idle-display .idle-text {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    #idle-display .idle-sub {
+      font-size: 1.15rem;
+      color: rgba(148, 163, 184, .6);
+      margin-top: 10px;
+      line-height: 1.6
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-10px)
+      }
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 6px
+    }
+
+    .sidebar-sub {
+      font-size: 1rem;
+      color: rgba(148, 163, 184, .7);
+      text-align: center;
+      margin-bottom: 24px;
+      line-height: 1.5
+    }
+
+    #qr-container {
+      width: 220px;
+      height: 220px;
+      background: #fff;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 0 40px rgba(59, 130, 246, .2);
+      animation: qrPulse 3s ease-in-out infinite;
+      overflow: hidden;
+      position: relative
+    }
+
+    #qr-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain
+    }
+
+    #qr-placeholder {
+      color: #94a3b8;
+      font-size: .85rem;
+      text-align: center;
+      padding: 20px
+    }
+
+    @keyframes qrPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, .15)
+      }
+
+      50% {
+        box-shadow: 0 0 40px rgba(59, 130, 246, .35)
+      }
+    }
+
+    .sidebar-cta {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #60a5fa;
+      text-align: center;
+      margin-top: 8px
+    }
+
+    .sidebar-arrow {
+      font-size: 2rem;
+      animation: bounce 2s infinite;
+      text-align: center;
+      margin-bottom: 12px
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-8px)
+      }
+    }
+
+    /* Queue indicator */
+    #queue-info {
+      margin-top: 20px;
+      padding: 10px 18px;
+      background: rgba(59, 130, 246, .08);
+      border: 1px solid rgba(59, 130, 246, .15);
+      border-radius: 12px;
+      text-align: center
+    }
+
+    #queue-info .q-label {
+      font-size: .8rem;
+      color: rgba(148, 163, 184, .5);
+      text-transform: uppercase;
+      letter-spacing: 2px
+    }
+
+    #queue-info .q-count {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #60a5fa
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    #progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 0 3px 0 0;
+      transition: width .3s linear;
+      z-index: 20
+    }
+
+    /* ===== CONFIG PANEL ===== */
+    #config-toggle {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      z-index: 100;
+      width: 36px;
+      height: 36px;
+      background: rgba(30, 41, 59, .8);
+      border: 1px solid rgba(59, 130, 246, .2);
+      border-radius: 50%;
+      cursor: pointer;
+      color: #60a5fa;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: .3;
+      transition: opacity .3s
+    }
+
+    #config-toggle:hover {
+      opacity: 1
+    }
+
+    #config-panel {
+      position: fixed;
+      bottom: 56px;
+      right: 10px;
+      z-index: 100;
+      width: 380px;
+      background: rgba(15, 23, 42, .95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(59, 130, 246, .2);
+      border-radius: 16px;
+      padding: 20px;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .5)
+    }
+
+    #config-panel.show {
+      display: block
+    }
+
+    #config-panel h3 {
+      color: #60a5fa;
+      margin-bottom: 14px;
+      font-size: 1rem
+    }
+
+    #config-panel label {
+      display: block;
+      font-size: .8rem;
+      color: #94a3b8;
+      margin: 10px 0 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px
+    }
+
+    #config-panel input {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(30, 41, 59, .8);
+      border: 1px solid rgba(59, 130, 246, .2);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Kanit';
+      font-size: .9rem;
+      outline: none
+    }
+
+    #config-panel input:focus {
+      border-color: #3b82f6
+    }
+
+    #config-panel button {
+      margin-top: 14px;
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Kanit';
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .2s
+    }
+
+    #config-panel button:hover {
+      transform: scale(1.02)
+    }
+
+    .config-status {
+      margin-top: 8px;
+      font-size: .8rem;
+      text-align: center
+    }
+
+    .config-status.ok {
+      color: #4ade80
+    }
+
+    .config-status.err {
+      color: #f87171
+    }
+
+    /* ===== TIMER DISPLAY ===== */
+    #timer-display {
+      position: absolute;
+      top: 10px;
+      right: 16px;
+      font-size: .75rem;
+      color: rgba(100, 116, 139, .5);
+      z-index: 11;
+      font-family: 'Inter', monospace
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background layers -->
+  <div id="bg-gradient"></div>
+  <div id="bg-glow1"></div>
+  <div id="bg-glow2"></div>
+  <div id="starfield"></div>
+
+  <!-- Header -->
+  <div id="header">
+    <h1>✦ EDU The Final Chapter ✦</h1>
+    <div class="subtitle">CONTACT SHARING</div>
+  </div>
+
+  <!-- Main content -->
+  <div id="main">
+    <!-- Display Area -->
+    <div id="display-area">
+      <div id="progress-bar" style="width:0%"></div>
+
+      <!-- Idle state -->
+      <div id="idle-display" class="visible">
+        <div class="idle-icon">💫</div>
+        <div class="idle-text">รอข้อมูล Contact...</div>
+        <div class="idle-sub">สแกน QR Code ด้านขวาเพื่อส่ง Contact ของคุณขึ้นจอ!</div>
+      </div>
+
+      <!-- Contact Card -->
+      <div id="contact-card">
+        <div class="card-major" id="card-major"></div>
+        <div class="card-name" id="card-name"></div>
+        <div class="card-ig" id="card-ig">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+          </svg>
+          <span id="card-ig-text"></span>
+        </div>
+        <div class="card-quote" id="card-quote"></div>
+        <div class="card-image-wrap" id="card-image-wrap" style="display:none">
+          <img id="card-image" src="" alt="User photo">
+        </div>
+      </div>
+
+      <div id="timer-display"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <div class="sidebar-arrow">☝️</div>
+      <div class="sidebar-title">📱 มาแจก Contact กัน!</div>
+      <div class="sidebar-sub">ส่ง Contact IG ของคุณ<br>ขึ้นจอให้ทุกคนเห็น!</div>
+      <div id="qr-container">
+        <div id="qr-placeholder">⚙️ ใส่ลิงค์ QR Code<br>ในการตั้งค่า</div>
+      </div>
+      <div class="sidebar-cta">สแกนเพื่อส่ง Contact ขึ้นจอ! 🎉</div>
+      <div id="queue-info">
+        <div class="q-label">คิวรอแสดง</div>
+        <div class="q-count" id="queue-count">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Config Toggle -->
+  <div id="config-toggle" onclick="toggleConfig()">⚙</div>
+  <div id="config-panel">
+    <h3>⚙️ ตั้งค่าระบบ</h3>
+    <label>Apps Script Web App URL</label>
+    <input type="text" id="cfg-api-url" placeholder="https://script.google.com/macros/s/xxx/exec">
+    <label>QR Code Image URL (ลิงค์รูปภาพ QR)</label>
+    <input type="text" id="cfg-qr-url" placeholder="https://example.com/qr-code.png">
+    <label>Google Form URL (สำหรับสร้าง QR)</label>
+    <input type="text" id="cfg-form-url" placeholder="https://forms.gle/xxx">
+    <button onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
+    <div class="config-status" id="config-status"></div>
+  </div>
+
+  <script>
+    // ==================== CONFIG ====================
+    let API_URL = localStorage.getItem('edu_api_url') || '';
+    let QR_IMAGE_URL = localStorage.getItem('edu_qr_url') || '';
+    let FORM_URL = localStorage.getItem('edu_form_url') || '';
+    const POLL_INTERVAL = 3000;
+    const DISPLAY_DURATION = 15000;
+
+    let currentData = null;
+    let displayTimer = null;
+    let pollTimer = null;
+    let progressInterval = null;
+    let displayStartTime = 0;
+
+    // ==================== STARFIELD ====================
+    function createStars() {
+      const sf = document.getElementById('starfield');
+      for (let i = 0; i < 200; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        const size = Math.random() * 3 + 1;
+        s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random() * 100}%;left:${Math.random() * 100}%;opacity:${Math.random() * .6 + .2};animation:twinkle ${Math.random() * 4 + 2}s ease-in-out infinite ${Math.random() * 3}s`;
+        sf.appendChild(s);
+      }
+      // Shooting stars
+      setInterval(() => {
+        const ss = document.createElement('div');
+        ss.style.cssText = `position:absolute;top:${Math.random() * 40}%;left:${Math.random() * 60}%;width:80px;height:1px;background:linear-gradient(90deg,#fff,transparent);animation:shootStar 1.5s linear forwards;opacity:.6;border-radius:1px`;
+        sf.appendChild(ss);
+        setTimeout(() => ss.remove(), 1600);
+      }, 4000);
+    }
+
+    // ==================== CONFIG PANEL ====================
+    function toggleConfig() {
+      document.getElementById('config-panel').classList.toggle('show');
+      document.getElementById('cfg-api-url').value = API_URL;
+      document.getElementById('cfg-qr-url').value = QR_IMAGE_URL;
+      document.getElementById('cfg-form-url').value = FORM_URL;
+    }
+
+    function saveConfig() {
+      API_URL = document.getElementById('cfg-api-url').value.trim();
+      QR_IMAGE_URL = document.getElementById('cfg-qr-url').value.trim();
+      FORM_URL = document.getElementById('cfg-form-url').value.trim();
+      localStorage.setItem('edu_api_url', API_URL);
+      localStorage.setItem('edu_qr_url', QR_IMAGE_URL);
+      localStorage.setItem('edu_form_url', FORM_URL);
+
+      // Update QR
+      const qrC = document.getElementById('qr-container');
+      if (QR_IMAGE_URL) {
+        qrC.innerHTML = `<img src="${QR_IMAGE_URL}" alt="QR Code">`;
+      } else if (FORM_URL) {
+        qrC.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(FORM_URL)}" alt="QR Code">`;
+      }
+
+      const st = document.getElementById('config-status');
+      st.textContent = '✅ บันทึกเรียบร้อย!';
+      st.className = 'config-status ok';
+      if (API_URL) startPolling();
+      setTimeout(() => { st.textContent = ''; }, 3000);
+    }
+
+    // ==================== POLLING ====================
+    function startPolling() {
+      if (pollTimer) clearInterval(pollTimer);
+      if (!API_URL) return;
+      poll();
+      pollTimer = setInterval(poll, POLL_INTERVAL);
+    }
+
+    async function poll() {
+      if (!API_URL) return;
+      try {
+        const url = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=getNext&t=' + Date.now();
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (json.success && json.hasData) {
+          if (json.isNew || !currentData || currentData.row !== json.data.row) {
+            showContact(json.data, json.remainingSec);
+          }
+          updateProgress(json.remainingSec);
+        } else {
+          if (currentData) hideContact();
+        }
+
+        // Update queue count
+        fetchQueueStatus();
+      } catch (e) {
+        console.error('Poll error:', e);
+      }
+    }
+
+    async function fetchQueueStatus() {
+      if (!API_URL) return;
+      try {
+        const url = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=status&t=' + Date.now();
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.success) {
+          document.getElementById('queue-count').textContent = json.pending || 0;
+        }
+      } catch (e) { }
+    }
+
+    // ==================== DISPLAY ====================
+    function showContact(data, remainingSec) {
+      currentData = data;
+      displayStartTime = Date.now();
+
+      const card = document.getElementById('contact-card');
+      const idle = document.getElementById('idle-display');
+
+      // Hide idle
+      idle.classList.remove('visible');
+
+      // Set data
+      document.getElementById('card-name').textContent = data.name || 'ไม่ระบุชื่อ';
+      document.getElementById('card-ig-text').textContent = data.instagram || '';
+      document.getElementById('card-major').textContent = '🎓 ' + (data.major || '');
+      document.getElementById('card-quote').textContent = data.quote || '';
+
+      // Image
+      const imgWrap = document.getElementById('card-image-wrap');
+      const img = document.getElementById('card-image');
+      if (data.imageUrl) {
+        img.src = data.imageUrl;
+        img.onerror = () => { imgWrap.style.display = 'none'; };
+        imgWrap.style.display = 'block';
+      } else {
+        imgWrap.style.display = 'none';
+      }
+
+      // Show card with animation
+      card.classList.remove('visible');
+      void card.offsetWidth; // force reflow
+      setTimeout(() => card.classList.add('visible'), 50);
+
+      // Progress bar
+      startProgress(remainingSec);
+    }
+
+    function hideContact() {
+      currentData = null;
+      const card = document.getElementById('contact-card');
+      const idle = document.getElementById('idle-display');
+      card.classList.remove('visible');
+      setTimeout(() => {
+        idle.classList.add('visible');
+      }, 400);
+      document.getElementById('progress-bar').style.width = '0%';
+      if (progressInterval) clearInterval(progressInterval);
+    }
+
+    function startProgress(totalSec) {
+      if (progressInterval) clearInterval(progressInterval);
+      const bar = document.getElementById('progress-bar');
+      const timerEl = document.getElementById('timer-display');
+      const totalMs = totalSec * 1000;
+      const startMs = Date.now();
+
+      progressInterval = setInterval(() => {
+        const elapsed = Date.now() - startMs;
+        const pct = Math.min((elapsed / totalMs) * 100, 100);
+        bar.style.width = pct + '%';
+        const remaining = Math.max(0, Math.ceil((totalMs - elapsed) / 1000));
+        timerEl.textContent = remaining + 's';
+        if (pct >= 100) clearInterval(progressInterval);
+      }, 100);
+    }
+
+    function updateProgress(remainingSec) {
+      // Already handled by startProgress
+    }
+
+    // ==================== DEMO MODE ====================
+    function loadDemoData() {
+      // Demo data for testing without API
+      const demos = [
+        { name: 'สมชาย ใจดี', major: 'วิศวกรรมคอมพิวเตอร์', instagram: '@somchai_jaidee', quote: 'ชีวิตคือการเดินทาง ไม่ใช่จุดหมาย', imageUrl: '', row: 1 },
+        { name: 'สมหญิง รักเรียน', major: 'ครุศาสตร์ภาษาอังกฤษ', instagram: '@somying_edu', quote: 'การศึกษาคือรากฐานของทุกสิ่ง', imageUrl: '', row: 2 },
+      ];
+      let idx = 0;
+      setInterval(() => {
+        showContact(demos[idx % demos.length], 15);
+        idx++;
+      }, 15000);
+      showContact(demos[0], 15);
+    }
+
+    // ==================== INIT ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      createStars();
+
+      // Load saved config
+      if (QR_IMAGE_URL) {
+        document.getElementById('qr-container').innerHTML = `<img src="${QR_IMAGE_URL}" alt="QR Code">`;
+      } else if (FORM_URL) {
+        document.getElementById('qr-container').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(FORM_URL)}" alt="QR Code">`;
+      }
+
+      // Start polling if API URL is set
+      if (API_URL) {
+        startPolling();
+      }
+    });
+  </script>
+</body>
+
+</html>
